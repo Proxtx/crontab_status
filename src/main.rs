@@ -1,6 +1,6 @@
 use std::env;
-use std::io::Read;
-use std::process;
+use std::str;
+use tokio::process::Command;
 
 #[tokio::main]
 async fn main() {
@@ -8,27 +8,9 @@ async fn main() {
     args_it.next();
     let program = args_it.next().expect("Expected a program to be run");
 
-    let mut cmd = process::Command::new(program)
-        .args(args_it)
-        .spawn()
-        .expect("Unable to spawn child");
-    //cmd.stdout.take().unwrap().read(buf);
-    if let Some(mut stdout) = cmd.stdout.take() {
-        tokio::spawn(async move {
-            loop {
-                let mut str = String::new();
-                stdout.read_to_string(&mut str).unwrap();
-                println!("{}", str);
-            }
-        });
-    }
-    if let Some(mut stderr) = cmd.stderr.take() {
-        tokio::spawn(async move {
-            loop {
-                let mut str = String::new();
-                stderr.read_to_string(&mut str).unwrap();
-                println!("{}", str);
-            }
-        });
-    }
+    let output = Command::new(program).args(args_it).output();
+
+    let output = output.await.unwrap();
+    println!("{}", str::from_utf8(&output.stdout).unwrap());
+    println!("{}", str::from_utf8(&output.stderr).unwrap());
 }
