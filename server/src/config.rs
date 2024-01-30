@@ -125,6 +125,10 @@ impl<'de> Visitor<'de> for CronExecutionTimeVisitor {
             }
         }
 
+        if let Some(_v) = str_split.next() {
+            return Err(E::custom("too many or too few time values given"));
+        }
+
         Ok(CronExecutionTime::Timing(minute, hour, day, month, weekday))
     }
 }

@@ -2,4 +2,4 @@ password="1234"
 port=3000
 
 [jobs]
-"test" = {execution_time="100 * 5 * *"}
+"test" = {execution_time="10 * 5 * * *"}
