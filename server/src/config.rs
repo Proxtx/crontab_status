@@ -6,6 +6,7 @@ use {
     },
     std::collections::HashMap,
     tokio::{fs::File, io::AsyncReadExt},
+    url::Url,
 };
 
 #[derive(Deserialize)]
@@ -18,6 +19,9 @@ pub struct Config {
 #[derive(Deserialize, Debug)]
 pub struct Job {
     pub execution_time: CronExecutionTime,
+    #[serde(default)]
+    pub id: String,
+    pub hook: Option<Url>,
 }
 
 #[derive(Debug)]
@@ -58,10 +62,38 @@ impl<'de> Visitor<'de> for CronExecutionTimeVisitor {
 
         let mut str_split = v.split(' ');
         for i in 0..5 {
-            let parsed = match str_split.next() {
+            let mut parsed = match str_split.next() {
                 Some(v) => v,
                 None => return Err(E::custom("Expected more time values")),
             };
+            if i == 3 {
+                parsed = match parsed {
+                    "jan" => "1",
+                    "feb" => "2",
+                    "mar" => "3",
+                    "apr" => "4",
+                    "may" => "5",
+                    "jun" => "6",
+                    "jul" => "7",
+                    "aug" => "8",
+                    "sep" => "9",
+                    "oct" => "10",
+                    "nov" => "11",
+                    "dez" => "12",
+                    _ => parsed,
+                }
+            } else if i == 4 {
+                parsed = match parsed {
+                    "sun" => "0",
+                    "mon" => "1",
+                    "tue" => "2",
+                    "wed" => "3",
+                    "thu" => "4",
+                    "fri" => "5",
+                    "sat" => "6",
+                    _ => parsed,
+                }
+            }
             let parsed = match parsed {
                 "*" => TimeValue::Every,
                 v => TimeValue::Explicit(match v.parse::<u8>() {
@@ -126,7 +158,7 @@ impl<'de> Visitor<'de> for CronExecutionTimeVisitor {
         }
 
         if let Some(_v) = str_split.next() {
-            return Err(E::custom("too many or too few time values given"));
+            return Err(E::custom("too many time values given"));
         }
 
         Ok(CronExecutionTime::Timing(minute, hour, day, month, weekday))
@@ -146,6 +178,13 @@ impl Config {
             .await?
             .read_to_string(&mut config)
             .await?;
-        Ok(toml::from_str::<Config>(&config)?)
+        let mut parsed = toml::from_str::<Config>(&config)?;
+        let string_default = String::default();
+        for (name, job) in parsed.jobs.iter_mut() {
+            if job.id == string_default {
+                job.id = name.clone();
+            }
+        }
+        Ok(parsed)
     }
 }
