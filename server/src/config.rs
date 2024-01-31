@@ -1,12 +1,14 @@
 use {
-    crate::error::ConfigResult,
+    crate::{
+        cron::{CronExecutionTime, Job, TimeValue},
+        error::ConfigResult,
+    },
     serde::{
         de::{self, Visitor},
         Deserialize,
     },
     std::collections::HashMap,
     tokio::{fs::File, io::AsyncReadExt},
-    url::Url,
 };
 
 #[derive(Deserialize)]
@@ -14,20 +16,6 @@ pub struct Config {
     pub password: String,
     pub port: u16,
     pub jobs: HashMap<String, Job>,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct Job {
-    pub execution_time: CronExecutionTime,
-    #[serde(default)]
-    pub id: String,
-    pub hook: Option<Url>,
-}
-
-#[derive(Debug)]
-pub enum CronExecutionTime {
-    Reboot,
-    Timing(TimeValue, TimeValue, TimeValue, TimeValue, TimeValue),
 }
 
 impl<'de> Deserialize<'de> for CronExecutionTime {
@@ -163,12 +151,6 @@ impl<'de> Visitor<'de> for CronExecutionTimeVisitor {
 
         Ok(CronExecutionTime::Timing(minute, hour, day, month, weekday))
     }
-}
-
-#[derive(Debug)]
-pub enum TimeValue {
-    Every,
-    Explicit(u8),
 }
 
 impl Config {

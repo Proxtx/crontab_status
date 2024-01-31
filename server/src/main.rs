@@ -1,4 +1,5 @@
 mod config;
+mod cron;
 mod error;
 
 #[tokio::main]
