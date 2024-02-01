@@ -6,6 +6,7 @@ pub type ConfigResult<T> = Result<T, ConfigError>;
 pub enum ConfigError {
     ReadFileError(std::io::Error),
     TomlParseError(toml::de::Error),
+    ClientNotFound,
 }
 
 impl Error for ConfigError {}
@@ -18,6 +19,9 @@ impl fmt::Display for ConfigError {
             }
             ConfigError::TomlParseError(v) => {
                 write!(f, "Unable to parse Toml: {}", v)
+            }
+            ConfigError::ClientNotFound => {
+                write!(f, "Client was not found in config!")
             }
         }
     }

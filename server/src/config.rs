@@ -11,7 +11,7 @@ use {
     tokio::{fs::File, io::AsyncReadExt},
 };
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     pub password: String,
     pub port: u16,
