@@ -55,15 +55,22 @@ async fn main() {
         },
     };
 
-    let client = reqwest::Client::new();
-    let _ = client
-        .post(address.clone())
-        .body(
-            serde_json::to_string(&request)
-                .expect("Was unable to send request. This is an internal error. Contact Proxtx"),
-        )
-        .send()
-        .await;
+    let init_request = request.clone();
+    let init_address = address.clone();
+    tokio::spawn(async move {
+        let client = reqwest::Client::new();
+        if let Err(e) =
+            client
+                .post(init_address)
+                .body(serde_json::to_string(&init_request).expect(
+                    "Was unable to send request. This is an internal error. Contact Proxtx",
+                ))
+                .send()
+                .await
+        {
+            println!("Was unable to send request: {}", e)
+        }
+    });
 
     let mut command_it = command.split(' ');
     let program = command_it.next().expect("Expected a program to be run");
@@ -86,23 +93,27 @@ async fn main() {
 
     request.data.update = response_update;
 
-    let _ = client
+    let client = reqwest::Client::new();
+    if let Err(e) = client
         .post(address)
         .body(
             serde_json::to_string(&request)
                 .expect("Failed to send request. Internal Error. Concat Proxtx"),
         )
         .send()
-        .await;
+        .await
+    {
+        println!("Error sending final request: {}", e)
+    }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 struct GuardedRequest<T> {
     password: String,
     data: T,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct ClientUpdate {
     job_id: String,
     hostname: String,
@@ -110,7 +121,7 @@ pub struct ClientUpdate {
     update: Update,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 enum Update {
     StartingJob,
     FinishedJob(String),
