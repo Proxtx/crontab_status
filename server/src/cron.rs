@@ -1,7 +1,7 @@
 use {
     crate::error::{ConfigError, ConfigResult},
     chrono::{DateTime, Datelike, Timelike, Utc},
-    serde::Deserialize,
+    serde::{Deserialize, Serialize},
     std::{
         collections::HashMap,
         sync::Arc,
@@ -11,8 +11,9 @@ use {
     url::Url,
 };
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Serialize)]
 pub struct Job {
+    #[serde(skip_serializing)]
     pub execution_time: CronExecutionTime,
     #[serde(default)]
     pub id: String,
@@ -71,6 +72,7 @@ pub enum TimeValue {
     Explicit(u8),
 }
 
+#[derive(Clone, Serialize, Debug)]
 pub enum Status {
     Running(SystemTime),
     Finished,
@@ -80,6 +82,7 @@ pub enum Status {
     ClientError,
 }
 
+#[derive(Clone, Serialize, Debug)]
 pub struct JobStatus {
     job: Job,
     status: Status,
@@ -175,6 +178,17 @@ impl JobManager {
         job.client_update(update);
 
         Ok(())
+    }
+
+    pub fn get_jobs(&self) -> Vec<&String> {
+        self.jobs.keys().collect()
+    }
+
+    pub async fn get_job(&self, job: &str) -> Option<JobStatus> {
+        match self.jobs.get(job) {
+            None => None,
+            Some(v) => Some(v.read().await.clone()),
+        }
     }
 }
 
