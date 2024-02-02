@@ -109,11 +109,7 @@ impl JobStatus {
             Status::ExpectingResponse => {
                 if let Some(ref url) = self.job.hook {
                     let url = url.clone();
-                    tokio::spawn(async move {
-                        if let Err(e) = reqwest::get(url).await {
-                            println!("Error calling hook: {}", e)
-                        }
-                    });
+                    call_hook(url)
                 }
                 self.status = Status::WaitingForResponse(SystemTime::now())
             }
@@ -135,6 +131,9 @@ impl JobStatus {
             }
             Update::Error(err) => {
                 self.log = Some(err);
+                if let Some(v) = &self.job.hook {
+                    call_hook(v.clone());
+                }
                 self.status = Status::ClientError;
             }
         }
@@ -192,4 +191,12 @@ enum Update {
     StartingJob,
     FinishedJob(String),
     Error(String),
+}
+
+fn call_hook(hook: Url) {
+    tokio::spawn(async move {
+        if let Err(e) = reqwest::get(hook).await {
+            println!("Error calling hook: {}", e)
+        }
+    });
 }
