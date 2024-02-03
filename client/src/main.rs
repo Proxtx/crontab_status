@@ -36,8 +36,11 @@ async fn main() {
         .get_one::<String>("password")
         .expect("Invalid type for 'password'");
     let command = args
-        .get_one::<String>("job")
-        .expect("Invalid type for '<job>'");
+        .get_many::<String>("job")
+        .expect("Invalid type for '<job>'")
+        .cloned()
+        .collect::<Vec<String>>()
+        .join(" ");
     let mut address = args
         .get_one::<Url>("address")
         .expect("Invalid type for url! Did not provide a correct url. https://example.com/")
