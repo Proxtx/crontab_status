@@ -39,8 +39,7 @@ async fn main() {
         .get_many::<String>("job")
         .expect("Invalid type for '<job>'")
         .cloned()
-        .collect::<Vec<String>>()
-        .join(" ");
+        .collect::<Vec<String>>();
     let mut address = args
         .get_one::<Url>("address")
         .expect("Invalid type for url! Did not provide a correct url. https://example.com/")
@@ -51,7 +50,7 @@ async fn main() {
         password: password.clone(),
         data: ClientUpdate {
             job_id: id.clone(),
-            command: command.clone(),
+            command: command.join(" "),
             hostname: gethostname::gethostname()
                 .into_string()
                 .expect("was unable to get hostname!"),
@@ -76,7 +75,11 @@ async fn main() {
         }
     });
 
-    let mut command_it = command.split(' ');
+    for arg in command.iter() {
+        println!("{}", arg);
+    }
+
+    let mut command_it = command.iter();
     let program = command_it.next().expect("Expected a program to be run");
 
     let output = TokioCommand::new(program)
