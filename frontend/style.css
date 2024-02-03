@@ -30,3 +30,7 @@
 .statusRunning {
   animation: running_anim 1s linear 0s infinite forwards;
 }
+
+.statusUnknown {
+  background-color: grey;
+}
