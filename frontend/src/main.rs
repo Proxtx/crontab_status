@@ -135,12 +135,38 @@ fn Job(name: String) -> impl IntoView {
     view! {
         <p>{move || match job.get() {
             Some(job) => {
-                format!("{:?}", job)
+                match &job {
+                    ResponseStatus::Success(v) => {
+                        view! {
+                            {format!("{:?}", &job)}
+                            <JobStatus status=&v.status />
+
+                        }.into_view()
+                    }
+                    _ => {
+                        "Error loading job!".into_view()
+                    }
+                }
             }
             None => {
-                format!("Loading: {}", name)
+                format!("Loading: {}", name).into_view()
             }
         }}</p>
+    }
+}
+
+#[component]
+fn JobStatus<'a>(status: &'a Status) -> impl IntoView {
+    let class = match status {
+        Status::ClientError => "statusError",
+        Status::Finished => "statusFinished",
+        Status::WaitingForResponse(_) => "statusWaiting",
+        Status::Running(_) => "statusRunning",
+        Status::ExpectingResponse => "statusWaiting",
+        Status::Unknown => "statusUnknown",
+    };
+    view! {
+        <div class = format!("status {}", class)></div>
     }
 }
 

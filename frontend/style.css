@@ -1,0 +1,32 @@
+.status {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.statusWaiting {
+  background-color: #facc15;
+}
+
+.statusError {
+  background-color: #f87171;
+}
+
+.statusFinished {
+  background-color: #4ade80;
+}
+
+@keyframes running_anim {
+  0% {
+    background-color: #4ade80;
+  }
+  50% {
+    background-color: #facc15;
+  }
+  100% {
+    background-color: #4ade80;
+  }
+}
+.statusRunning {
+  animation: running_anim 1s linear 0s infinite forwards;
+}
