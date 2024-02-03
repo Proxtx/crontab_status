@@ -75,10 +75,6 @@ async fn main() {
         }
     });
 
-    for arg in command.iter() {
-        println!("{}", arg);
-    }
-
     let mut command_it = command.iter();
     let program = command_it.next().expect("Expected a program to be run");
 
