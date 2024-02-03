@@ -1,5 +1,0 @@
-password="1234"
-port=3000
-
-[jobs]
-"test" = {execution_time="* * * * *", hook="https://kfjasödkljföasldkfj.com"}
