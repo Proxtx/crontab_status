@@ -1,7 +1,7 @@
 use {
     crate::error::{ConfigError, ConfigResult},
     chrono::{DateTime, Datelike, Timelike, Utc},
-    serde::{Deserialize, Serialize},
+    serde::{Deserialize, Serialize, Serializer},
     std::{
         collections::HashMap,
         sync::Arc,
@@ -13,7 +13,6 @@ use {
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 pub struct Job {
-    #[serde(skip_serializing)]
     pub execution_time: CronExecutionTime,
     #[serde(default)]
     pub id: String,
@@ -24,6 +23,21 @@ pub struct Job {
 pub enum CronExecutionTime {
     Reboot,
     Timing(TimeValue, TimeValue, TimeValue, TimeValue, TimeValue),
+}
+
+impl Serialize for CronExecutionTime {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let res = match self {
+            CronExecutionTime::Reboot => String::from("@reboot"),
+            CronExecutionTime::Timing(v1, v2, v3, v4, v5) => {
+                format!("{} {} {} {} {}", v1, v2, v3, v4, v5)
+            }
+        };
+        serializer.serialize_str(&res)
+    }
 }
 
 impl CronExecutionTime {
@@ -70,6 +84,15 @@ impl CronExecutionTime {
 pub enum TimeValue {
     Every,
     Explicit(u8),
+}
+
+impl std::fmt::Display for TimeValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TimeValue::Every => write!(f, "*"),
+            TimeValue::Explicit(v) => write!(f, "{}", v),
+        }
+    }
 }
 
 #[derive(Clone, Serialize, Debug)]
