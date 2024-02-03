@@ -27,7 +27,8 @@ struct Cli {
 
 #[tokio::main]
 async fn main() {
-    let job_command = Command::new("job_command").arg(Arg::new("job").last(true).required(true));
+    let job_command =
+        Command::new("job_command").arg(Arg::new("job").last(true).required(true).num_args(1..));
     let cli = Cli::augment_args(job_command);
     let args = cli.get_matches();
     let id = args.get_one::<String>("id").expect("Invalid type for 'ID'");
