@@ -98,7 +98,7 @@ impl std::fmt::Display for TimeValue {
 #[derive(Clone, Serialize, Debug)]
 pub enum Status {
     Running(SystemTime),
-    Finished,
+    Finished(SystemTime),
     Unknown,
     ExpectingResponse,
     WaitingForResponse(SystemTime),
@@ -127,9 +127,22 @@ impl JobStatus {
 
     pub fn update(&mut self) {
         match self.status {
-            Status::Finished | Status::Unknown => {
+            Status::Unknown => {
                 if self.job.execution_time.now() {
                     self.status = Status::ExpectingResponse
+                }
+            }
+            Status::Finished(time) => {
+                if self.job.execution_time.now() {
+                    let now: DateTime<Utc> = chrono::DateTime::from(SystemTime::now());
+                    let happened: DateTime<Utc> = chrono::DateTime::from(time);
+                    if now.minute() != happened.minute()
+                        || now.hour() != happened.hour()
+                        || now.day() != happened.day()
+                        || now.month() != happened.month()
+                    {
+                        self.status = Status::ExpectingResponse
+                    }
                 }
             }
             Status::ExpectingResponse => {
@@ -153,7 +166,7 @@ impl JobStatus {
             }
             Update::FinishedJob(log) => {
                 self.log = Some(log);
-                self.status = Status::Finished;
+                self.status = Status::Finished(SystemTime::now());
             }
             Update::Error(err) => {
                 self.log = Some(err);
