@@ -119,9 +119,9 @@ impl JobStatus {
         Self {
             job,
             status: Status::Unknown,
-            log: Some(String::new()),
-            hostname: Some(String::new()),
-            command: Some(String::new()),
+            log: None,
+            hostname: None,
+            command: None,
         }
     }
 
