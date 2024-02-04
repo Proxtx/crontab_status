@@ -126,7 +126,7 @@ fn Job(name: String) -> impl IntoView {
             .post(
                 Url::parse(&leptos::window().origin())
                     .unwrap()
-                    .join("/get-jobs")
+                    .join("/get-job")
                     .unwrap(),
             )
             .body(serde_json::to_string(&request).unwrap())
