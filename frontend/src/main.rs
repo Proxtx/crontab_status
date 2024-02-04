@@ -1,9 +1,9 @@
 use leptos::*;
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 use url::Url;
-use web_sys::wasm_bindgen::JsCast;
-const START_URL: &str = "http://cron.proxtx.de";
+use web_sys::{wasm_bindgen::JsCast, HtmlInputElement};
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -43,15 +43,26 @@ fn App() -> impl IntoView {
             };
             let client = reqwest::Client::new();
             let res = match client
-                .post(format!("{}/get-jobs", START_URL))
+                .post(
+                    Url::parse(&leptos::window().origin())
+                        .unwrap()
+                        .join("/get-jobs")
+                        .unwrap(),
+                )
                 .body(serde_json::to_string(&request).unwrap())
                 .send()
                 .await
             {
-                Ok(v) => match v.text().await {
-                    Ok(v) => v,
-                    Err(_) => return ResponseStatus::ParseError,
-                },
+                Ok(v) => {
+                    if let StatusCode::UNAUTHORIZED = v.status() {
+                        return ResponseStatus::Unauthorized;
+                    }
+
+                    match v.text().await {
+                        Ok(v) => v,
+                        Err(_) => return ResponseStatus::ParseError,
+                    }
+                }
                 Err(_) => {
                     return ResponseStatus::RequestError;
                 }
@@ -68,28 +79,34 @@ fn App() -> impl IntoView {
         },
     );
 
-    view! {<p>"Hello "</p> {move || match jobs.get() {
+    view! {{move || match jobs.get() {
         Some(v) => {
             view! {
                 {
                     match v {
                         ResponseStatus::Success(v) => {
                             view! {
+                                <h1>Status</h1>
                                 {
                                     v.into_iter().map(|n| view! {<Job name=n></Job>}).collect_view()
                                 }
                             }.into_view()
                         },
+                        ResponseStatus::Unauthorized => {
+                            view! {
+                                <Login />
+                            }.into_view()
+                        }
                         _ => {
-                            logging::log!("{:?}", v);
-                            view! {{format!("Error: {:?}", v)}}.into_view()
+
+                            view! {<h1>Status</h1>{format!("Error: {:?}", v)}}.into_view()
                         }
                     }
                 }
             }.into_view()
         }
         None => {
-            view! {"Not world"}.into_view()
+            view! {"Loading..."}.into_view()
         }
     }}}
 }
@@ -106,7 +123,12 @@ fn Job(name: String) -> impl IntoView {
 
         let client = reqwest::Client::new();
         let res = match client
-            .post(format!("{}/get-job", START_URL))
+            .post(
+                Url::parse(&leptos::window().origin())
+                    .unwrap()
+                    .join("/get-jobs")
+                    .unwrap(),
+            )
             .body(serde_json::to_string(&request).unwrap())
             .send()
             .await
@@ -119,8 +141,6 @@ fn Job(name: String) -> impl IntoView {
                 return ResponseStatus::RequestError;
             }
         };
-
-        logging::log!("{}", res);
 
         let job: JobStatus = match serde_json::from_str(&res) {
             Ok(v) => v,
@@ -135,16 +155,26 @@ fn Job(name: String) -> impl IntoView {
     view! {
         <p>{move || match job.get() {
             Some(job) => {
-                match &job {
+                match job {
                     ResponseStatus::Success(v) => {
+                        let (text, class) = match &v.status {
+                            Status::ClientError => ("Failed", "statusError"),
+                            Status::Finished(_) => ("Operational", "statusFinished"),
+                            Status::WaitingForResponse(_) => ("Challenge", "statusWaiting"),
+                            Status::Running(_) => ("Running", "statusRunning"),
+                            Status::ExpectingResponse => ("Waiting", "statusWaiting"),
+                            Status::Unknown => ("Unknown", "statusUnknown"),
+                        };
                         view! {
-                            {format!("{:?}", &job)}
-                            <JobStatus status=&v.status />
+                            <div class=format!("status {}", class)>
+                            <a class="statusText">{text}</a>
+                            <JobData job_status = v/>
+                            </div>
 
                         }.into_view()
                     }
                     _ => {
-                        "Error loading job!".into_view()
+                        format!("Error loading job: {}", name).into_view()
                     }
                 }
             }
@@ -156,17 +186,56 @@ fn Job(name: String) -> impl IntoView {
 }
 
 #[component]
-fn JobStatus<'a>(status: &'a Status) -> impl IntoView {
-    let class = match status {
-        Status::ClientError => "statusError",
-        Status::Finished => "statusFinished",
-        Status::WaitingForResponse(_) => "statusWaiting",
-        Status::Running(_) => "statusRunning",
-        Status::ExpectingResponse => "statusWaiting",
-        Status::Unknown => "statusUnknown",
-    };
+fn JobData(job_status: JobStatus) -> impl IntoView {
     view! {
-        <div class = format!("status {}", class)></div>
+        <div class="jobData"><h3>{job_status.job.id}</h3>
+        {
+            if let Some(v) = job_status.hostname {
+                view! {
+                    <IconAttribute icon_path="icons/server.svg".to_string() text={v}/>
+                }
+            }
+            else {
+                view! {}.into_view()
+            }
+        }
+        <IconAttribute icon_path="icons/timer.svg".to_string() text={job_status.job.execution_time}/>
+        {
+            if let Some(v) = job_status.command {
+                view! {
+                    <IconAttribute icon_path="icons/terminal.svg".to_string() text={v}/>
+                }
+            }
+            else {
+                view! {}.into_view()
+            }
+        }
+        <Log log=job_status.log.unwrap_or_default()/>
+        </div>
+    }
+}
+
+#[component]
+fn IconAttribute(icon_path: String, text: String) -> impl IntoView {
+    view! {
+        <div class="attribute"><img src={icon_path} /><a>{text}</a></div>
+    }
+}
+
+#[component]
+fn Log(log: String) -> impl IntoView {
+    view! {
+        <div class="log">{log}</div>
+    }
+}
+
+#[component]
+fn Login() -> impl IntoView {
+    view! {
+        <div class="jobData">
+        <h2>Login</h2>
+        <input id="password_input" on:change=|v| {set_password_cookie(v.target().unwrap().dyn_into::<HtmlInputElement>().unwrap().value()); reload()} type="password" />
+        </div>
     }
 }
 
@@ -198,6 +267,16 @@ fn get_password_cookie() -> Option<String> {
     None
 }
 
+fn set_password_cookie(password: String) {
+    let html_doc: web_sys::HtmlDocument = document().dyn_into().unwrap();
+    let cookie = cookie::Cookie::new("pwd", password);
+    html_doc.set_cookie(&cookie.to_string()).unwrap();
+}
+
+fn reload() {
+    leptos::window().location().reload().unwrap();
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct Job {
     pub execution_time: String,
@@ -218,7 +297,7 @@ pub struct JobStatus {
 #[derive(Clone, Deserialize, Debug)]
 pub enum Status {
     Running(SystemTime),
-    Finished,
+    Finished(SystemTime),
     Unknown,
     ExpectingResponse,
     WaitingForResponse(SystemTime),

@@ -1,7 +1,54 @@
+@font-face {
+  font-family: "Mono";
+  src: url(UbuntuMono.ttf);
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("Inter.ttf");
+}
+
+:root {
+  --bg-color: #ededf4;
+  --bg-color-2: #e6e6f0;
+  --text: #190b28;
+  --green: #169873;
+  --red: #c1292e;
+  --yellow: #fbaf00;
+  --gap: 9px;
+  --border-radius: 4px;
+}
+
+body {
+  font-family: "Inter";
+  background-color: var(--bg-color);
+  padding: calc(var(--gap) * 3);
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
 .status {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  display: flex;
+  padding-top: var(--gap);
+  flex-direction: column;
+  gap: var(--gap);
+  border-radius: var(--border-radius);
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.statusText {
+  color: white;
+  font-size: 10;
 }
 
 .statusWaiting {
@@ -14,6 +61,19 @@
 
 .statusFinished {
   background-color: #4ade80;
+}
+
+.jobData {
+  background-color: var(--bg-color-2);
+  width: 100%;
+  padding: var(--gap);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap);
+  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  position: relative;
 }
 
 @keyframes running_anim {
@@ -33,4 +93,43 @@
 
 .statusUnknown {
   background-color: grey;
+}
+
+.attribute {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.attribute a {
+  text-wrap: nowrap;
+  overflow: hidden;
+}
+
+.log {
+  width: 100%;
+  position: relative;
+  height: 200px;
+  background-color: var(--text);
+  color: #ffffff;
+  font-family: "Mono";
+  border-radius: var(--border-radius);
+  padding: calc(var(--gap) / 2);
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+#password_input {
+  width: 100%;
+  padding: var(--gap);
+  font-size: 110%;
+  box-sizing: border-box;
+  border-radius: var(--border-radius);
+  background-color: var(--bg-color);
+  border: none;
+}
+
+#password_input:focus {
+  outline: none;
 }

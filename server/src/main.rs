@@ -6,6 +6,7 @@ use config::Config;
 use cron::ClientUpdate;
 use cron::JobManager;
 use cron::JobStatus;
+use rocket::fs::FileServer;
 use rocket::http::Status;
 use rocket::post;
 use rocket::routes;
@@ -30,6 +31,7 @@ async fn rocket() -> _ {
         .manage(manager)
         .manage(config)
         .mount("/", routes![job_update, get_job, get_jobs])
+        .mount("/", FileServer::from("../frontend/dist/"))
 }
 
 #[derive(Deserialize)]
