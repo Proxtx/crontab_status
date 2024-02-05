@@ -2,17 +2,12 @@ mod config;
 mod cron;
 mod error;
 
-use config::Config;
-use cron::ClientUpdate;
-use cron::JobManager;
-use cron::JobStatus;
-use rocket::fs::FileServer;
-use rocket::http::Status;
-use rocket::post;
-use rocket::routes;
-use rocket::serde::json::Json;
-use rocket::State;
-use serde::Deserialize;
+use {
+    config::Config,
+    cron::{ClientUpdate, JobManager, JobStatus},
+    rocket::{fs::FileServer, http::Status, post, routes, serde::json::Json, State},
+    serde::Deserialize,
+};
 
 #[rocket::launch]
 async fn rocket() -> _ {
