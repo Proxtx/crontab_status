@@ -1,9 +1,11 @@
-use leptos::*;
-use reqwest::StatusCode;
-use serde::{Deserialize, Serialize};
-use std::time::SystemTime;
-use url::Url;
-use web_sys::{wasm_bindgen::JsCast, HtmlInputElement};
+use {
+    leptos::*,
+    reqwest::StatusCode,
+    serde::{Deserialize, Serialize},
+    std::time::SystemTime,
+    url::Url,
+    web_sys::{wasm_bindgen::JsCast, HtmlInputElement},
+};
 
 fn main() {
     console_error_panic_hook::set_once();

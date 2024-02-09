@@ -1,11 +1,10 @@
-use clap::Arg;
-use clap::Args;
-use clap::Command;
-use clap::Parser;
-use serde::Serialize;
-use std::str;
-use tokio::process::Command as TokioCommand;
-use url::Url;
+use {
+    clap::{Arg, Args, Command, Parser},
+    serde::Serialize,
+    std::str,
+    tokio::process::Command as TokioCommand,
+    url::Url,
+};
 
 #[derive(Parser, Debug)]
 #[command(
