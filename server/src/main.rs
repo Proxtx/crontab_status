@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 mod config;
 mod cron;
 mod error;

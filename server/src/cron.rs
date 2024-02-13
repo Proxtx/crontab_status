@@ -95,7 +95,7 @@ impl std::fmt::Display for TimeValue {
     }
 }
 
-#[derive(Clone, Serialize, Debug)]
+#[derive(Clone, Serialize, Debug, PartialEq)]
 pub enum Status {
     Running(SystemTime),
     Finished(SystemTime),
@@ -170,7 +170,9 @@ impl JobStatus {
             }
             Update::Error(err) => {
                 self.log = Some(err);
-                if let Some(v) = &self.job.hook {
+                if let Some(v) = &self.job.hook
+                    && self.status != Status::ClientError
+                {
                     call_hook(v.clone());
                 }
                 self.status = Status::ClientError;
