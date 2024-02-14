@@ -13,7 +13,7 @@ this allows you to check if your corontab jobs actually run and if they are succ
 - 2. run `trunk build --release`
 - 3. cd into the "../server" directory
 - 4. copy "config.toml.example" to "config.toml"
-- 5. edit "config.toml". To create new jobs copy the first line below the job section and edit it's name (id) and optionally provide a webhook that is to be called, when the job failed. Note that the contab times currently don't support ranges
+- 5. edit "config.toml". To create new jobs copy the first line below the job section and edit it's name (id) and optionally provide a webhook that is to be called, when the job failed. Note that the contab times currently don't support ranges. Crontab times are checked against utc
 - 6. run `cargo run --release`
 
 3. On the client
