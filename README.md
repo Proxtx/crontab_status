@@ -23,6 +23,6 @@ this allows you to check if your corontab jobs actually run and if they are succ
 - 3. then edit your crontab config
 - 4. prefix the jobs (after the crontab time) you added to your config.toml in the server section with `crontab_status_client --id your-job-id --password your-password --address http://server.address:port -- `
 
-4. Now your should be good to go. Visit the port the server opened and you should see the gui.
+4. Now you should be good to go. Visit the port the server opened and you should see the gui.
 
 ![Screenshot](screenshot.png)
