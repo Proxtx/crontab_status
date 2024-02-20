@@ -171,7 +171,6 @@ impl JobStatus {
             Update::Error(err) => {
                 self.log = Some(err);
                 if let Some(v) = &self.job.hook
-                    && self.status != Status::ClientError
                 {
                     call_hook(v.clone());
                 }
