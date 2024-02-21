@@ -234,9 +234,11 @@ fn Log(log: String) -> impl IntoView {
 #[component]
 fn Login() -> impl IntoView {
     view! {
+        <h1>Crontab Status</h1>
+        <br />
         <div class="jobData">
         <h2>Login</h2>
-        <input id="password_input" on:change=|v| {set_password_cookie(v.target().unwrap().dyn_into::<HtmlInputElement>().unwrap().value()); reload()} type="password" />
+        <input placeholder="Password" id="password_input" on:change=|v| {set_password_cookie(v.target().unwrap().dyn_into::<HtmlInputElement>().unwrap().value()); reload()} type="password" />
         </div>
     }
 }
