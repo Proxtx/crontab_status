@@ -1,4 +1,4 @@
-![Crontab_Status](frontend/favicon.ico)
+<img src="frontend/favicon.ico" width="50%" />
 
 # crontab_status
 
