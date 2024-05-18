@@ -1,4 +1,4 @@
-<img src="frontend/favicon.ico" width="50%" />
+<img src="frontend/favicon.ico" width="200px" />
 
 # crontab_status
 
