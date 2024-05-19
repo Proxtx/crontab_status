@@ -162,7 +162,7 @@ fn Job(name: String) -> impl IntoView {
                         let (text, class) = match &v.status {
                             Status::ClientError => ("Failed", "statusError"),
                             Status::Finished(_) => ("Operational", "statusFinished"),
-                            Status::WaitingForResponse(_) => ("Challenge", "statusWaiting"),
+                            Status::WaitingForResponse(_) => ("Challenge", "statusError"),
                             Status::Running(_) => ("Running", "statusRunning"),
                             Status::ExpectingResponse => ("Waiting", "statusWaiting"),
                             Status::Unknown => ("Unknown", "statusUnknown"),
